@@ -22,7 +22,7 @@ public class Main extends Application{
 	public static Cell[][] cells;
 	public static int[][] grid;
 	public Color[] turnColors;
-	public static boolean isHost=false;
+	public static boolean isHost=true;
 	public static int seed;
 	public static int me;
 	
@@ -31,13 +31,14 @@ public class Main extends Application{
 	public void start(Stage screen) throws Exception {  //most of this should move to a seperate class
 		if(isHost) {
 			Host h = new Host(12345);
-			h.initConnections();
+			h.start();
 		}
-		else {
+//		else {
 			Client c = new Client();
 			c.connectToHost("localhost",12345);
 			c.setBasicInfo();
-		}
+			c.setupLoop();
+//		}
 		Random r = new Random(seed);
 		turnColors = new Color[numPlayers];
 		for(int i=0; i<numPlayers; i++) {
@@ -63,7 +64,7 @@ public class Main extends Application{
 				cells[i][j].setOnMouseClicked(e -> {
 					Cell source = ((Cell)e.getSource());
 					if(valid(source)) {
-						source.getChildren().add(new Circle(15, turnColors[turn]));
+						source.addCircle();
 						grid[source.x][source.y]=turn;
 						checkWin();
 						turn = (turn+1) %numPlayers;
@@ -80,6 +81,7 @@ public class Main extends Application{
 		screen.setScene(scene);
 		
 		screen.show();
+		//gameloop 
 
 	}
 	private boolean valid(Object source) {
@@ -196,13 +198,16 @@ public class Main extends Application{
 		}
 		return false;
 	}
-	private class Cell extends StackPane{
+	protected class Cell extends StackPane{
 		public int x,y;
 		
 		public Cell(int x, int y) {
 			super();
 			this.x = x;
 			this.y = y;
+		}
+		public void addCircle() {
+			getChildren().add(new Circle(15, turnColors[turn]));
 		}
 	}
 	

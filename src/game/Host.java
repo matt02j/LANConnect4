@@ -3,8 +3,7 @@ package game;
 import java.io.*;
 import java.net.*;
 
-
-public class Host {
+public class Host extends Thread{
 	
 	public static int port;
 	public static ServerSocket hostSocket;
@@ -27,7 +26,10 @@ public class Host {
 		
 	}
 	
-		
+	public void run() {
+		initConnections();
+		setupLoop();
+	}
 	public void initConnections() {
 		for(int i=0;i<Main.numPlayers;i++) {
 			System.out.println("waiting for players");
@@ -37,10 +39,34 @@ public class Host {
 				 to_client[i] = new PrintWriter(sockets[i].getOutputStream()); 
 				System.out.println("player " + i + " connected");
 				to_client[i].println(Main.numPlayers+" "+i+" "+Main.columns+" "+Main.rows+" "+Main.seed);
+				to_client[i].flush();
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(3);
 			}
 		}
+		try {
+			hostSocket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(5);
+		}
+	}
+	public void setupLoop() {
+		try {
+			for(int i=0;i<Main.numPlayers;i++) {
+				to_client[i].println("true " + port+i+1 +"  ");
+			}
+			for(int i=0;i<Main.numPlayers;i++) {
+				InetAddress host = sockets[i].getInetAddress();
+				to_client[i].println("false "+ port+i + " "+ host);
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+			System.exit(7);
+		}
+	}
+	public void close() {
+		//TODO
 	}
 }
