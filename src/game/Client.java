@@ -1,4 +1,3 @@
-package game;
 
 import java.io.*;
 import java.net.*;
@@ -88,7 +87,8 @@ public class Client {
 					right = myHost.accept();
 			}
 			else {
-					right = new Socket(host,port);
+					right = new Socket();
+					right.connect(new InetSocketAddress(host,port),10);
 				
 			}
 	
@@ -108,7 +108,8 @@ public class Client {
 					left = myHost.accept();
 			}
 			else {
-				left = new Socket(host,port);
+				left = new Socket();
+				left.connect(new InetSocketAddress(host,port),10);
 				
 			}
 	
@@ -124,15 +125,19 @@ public class Client {
 	public void setupLoop() {
 		try {
 			String input = from_server.readLine();
+			System.out.println("right "+input);
 			String[] in = input.split(" ");
 			boolean isHost = Boolean.parseBoolean(in[0]);
 			int port = Integer.parseInt(in[1]);
-			connectRight(isHost,port,"");
+			String host = in[2];
+			connectRight(isHost,port,host);
 			input = from_server.readLine();
+			System.out.println("left "+input);
 			in = input.split(" ");
 			isHost = Boolean.parseBoolean(in[0]);
 			port = Integer.parseInt(in[1]);
-			InetAddress host = InetAddress.getByName(in[2]);
+			host = in[2];
+			connectLeft(isHost,port,host);
 		} 
 		catch(Exception e) {
 			e.printStackTrace();

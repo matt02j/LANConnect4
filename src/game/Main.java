@@ -1,4 +1,3 @@
-package game;
 
 
 import javafx.scene.paint.Color;
@@ -64,11 +63,12 @@ public class Main extends Application{
 				cells[i][j].setMinSize(columnWidth, rowHeight);
 				cells[i][j].setOnMouseClicked(e -> {
 					Cell source = ((Cell)e.getSource());
-					if(valid(source)) {
+					if(valid(source)&& turn==me) {
 						source.addCircle();
 						grid[source.x][source.y]=turn;
 						checkWin();
 						turn = (turn+1) %numPlayers;
+						c.sendTurn();
 					}
 				});
 				
