@@ -31,7 +31,7 @@ public class Main extends Application{
 	@Override
 	public void start(Stage screen) throws Exception {  //most of this should move to a seperate class
 		if(isHost) {
-			Host h = new Host(12345);
+			Srv h = new Srv(12345);
 			h.start();
 		}
 //		else {

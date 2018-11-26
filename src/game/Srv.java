@@ -3,7 +3,7 @@ package game;
 import java.io.*;
 import java.net.*;
 
-public class Host extends Thread{
+public class Srv extends Thread{
 	
 	public static int port;
 	public static ServerSocket hostSocket;
@@ -11,7 +11,7 @@ public class Host extends Thread{
 	 BufferedReader[] from_client;   
 	 PrintWriter[] to_client; 
 	
-	public Host(int port) {
+	public Srv(int port) {
 		this.port=port;
 
 		try {
