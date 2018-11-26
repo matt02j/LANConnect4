@@ -217,7 +217,7 @@ public class Main extends Application{
 		HEIGHT=900; 
 		rows=20;
 		columns=20;
-		numPlayers = 5;
+		numPlayers = 2;
 		seed=2;
 		
 		launch(args);

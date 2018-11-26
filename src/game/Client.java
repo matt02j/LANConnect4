@@ -84,7 +84,7 @@ public class Client {
 	public void connectRight(boolean isHost, int port,String host) {
 		try {
 			if(isHost){
-					myHost =  new ServerSocket(port+Main.me,1);
+					myHost =  new ServerSocket(port,1);
 					right = myHost.accept();
 			}
 			else {
@@ -104,7 +104,7 @@ public class Client {
 	public void connectLeft(boolean isHost, int port,String host) {
 		try {
 			if(isHost){
-					myHost =  new ServerSocket(port+Main.me,1);
+					myHost =  new ServerSocket(port,1);
 					left = myHost.accept();
 			}
 			else {

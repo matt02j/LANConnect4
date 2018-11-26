@@ -23,7 +23,8 @@ public class Host extends Thread{
 			e.printStackTrace();
 			System.exit(1);
 		}
-		
+
+		System.out.println(hostSocket.getInetAddress());
 	}
 	
 	public void run() {
@@ -55,11 +56,10 @@ public class Host extends Thread{
 	public void setupLoop() {
 		try {
 			for(int i=0;i<Main.numPlayers;i++) {
-				to_client[i].println("true " + port+i+1 +"  ");
-			}
-			for(int i=0;i<Main.numPlayers;i++) {
-				InetAddress host = sockets[i].getInetAddress();
-				to_client[i].println("false "+ port+i + " "+ host);
+				to_client[i].println("true " + (port+i+1) +"  ");
+				to_client[i].flush();
+				to_client[(i+1)%Main.numPlayers].println("false " + (port+i+1) +" " +((InetSocketAddress)sockets[i].getLocalSocketAddress()).getAddress().toString().replace("/",""));
+				to_client[(i+1)%Main.numPlayers].flush();				
 			}
 		}catch(Exception e) {
 			e.printStackTrace();
