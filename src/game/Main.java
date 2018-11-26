@@ -22,7 +22,8 @@ public class Main extends Application{
 	public static Cell[][] cells;
 	public static int[][] grid;
 	public Color[] turnColors;
-	public static boolean isHost=true;
+	public static boolean isHost;
+	public static String hostIP;
 	public static int seed;
 	public static int me;
 	
@@ -35,7 +36,7 @@ public class Main extends Application{
 		}
 //		else {
 			Client c = new Client();
-			c.connectToHost("localhost",12345);
+			c.connectToHost(hostIP,12345);
 			c.setBasicInfo();
 			c.setupLoop();
 //		}
@@ -215,11 +216,19 @@ public class Main extends Application{
 	public static void main(String[] args) {
 		WIDTH=900;
 		HEIGHT=900; 
-		rows=20;
-		columns=20;
-		numPlayers = 2;
 		seed=2;
-		
+		if(args.length < 1) {
+			//error
+		}
+		isHost = Boolean.parseBoolean(args[0]);
+		if(isHost) {
+			numPlayers = Integer.parseInt(args[1]);
+			rows = Integer.parseInt(args[2]);
+			columns = Integer.parseInt(args[3]);
+		}
+		else {
+			hostIP = args[1];
+		}
 		launch(args);
 
 	}
