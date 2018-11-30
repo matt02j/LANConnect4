@@ -1,4 +1,4 @@
-
+package game;
 import java.io.*;
 import java.net.*;
 
@@ -20,35 +20,57 @@ public class Client {
 	public void close() {
 		//TODO
 	}
-	public void getTurn() {
+	public String getTurn() {
 		boolean read =false;
-		int i,j;
+		int i,j,t;
 		String turnInfo="";
 		try {
-			while(!read) {
+//			while(!read) { //TODO add timeout
+			try {
 				if((turnInfo = from_Left.readLine())!=null) {
 					read=true;
 				}
-				else if((turnInfo = from_Right.readLine())!=null) {
+			}
+			catch(SocketTimeoutException e) {
+			}
+			try {
+				if(!read && (turnInfo = from_Right.readLine())!=null) {
 					read=true;
 				}
 			}
+			catch(SocketTimeoutException e) {
+				if(!read) {
+					return "NA";
+				}
+			}
+//			}
+
 			String[] in = turnInfo.split(" ");
-			Main.turn = Integer.parseInt(in[0]);
+			t = Integer.parseInt(in[0]);
 			i = Integer.parseInt(in[1]);
 			j = Integer.parseInt(in[2]);
 			//update grid
 			Main.grid[i][j]=Main.turn;
 			Main.cells[i][j].addCircle();
+			Main.turn = t;
 			//checkwin
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 			System.exit(8);
 		}
+		return turnInfo;
 	}
-	public void sendTurn() {
-		
+	public void sendTurn(int i, int j) { //used when you take a turn
+		String info = String.valueOf(Main.turn) + " "+i +" "+ j;
+		to_Left.println(info);
+		to_Left.flush();
+		to_Right.println(info);
+		to_Right.flush();
+	}
+	public void sendTurn(String turnInfo) {//used to pass turn info around the loop
+		to_Left.println(turnInfo);
+		to_Left.flush();
 	}
 	public void connectToHost(String host, int port) {
 		try {
@@ -88,7 +110,7 @@ public class Client {
 			}
 			else {
 					right = new Socket();
-					right.connect(new InetSocketAddress(host,port),10);
+					right.connect(new InetSocketAddress(host,port),0);
 				
 			}
 	
@@ -109,13 +131,13 @@ public class Client {
 			}
 			else {
 				left = new Socket();
-				left.connect(new InetSocketAddress(host,port),10);
+				left.connect(new InetSocketAddress(host,port),0);
 				
 			}
 	
 			from_Left = new BufferedReader(new InputStreamReader(left.getInputStream()));  
 			to_Left = new PrintWriter(left.getOutputStream()); 
-			left.setSoTimeout(14);
+			left.setSoTimeout(10);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -125,19 +147,20 @@ public class Client {
 	public void setupLoop() {
 		try {
 			String input = from_server.readLine();
-			System.out.println("right "+input);
+//			System.out.println("right "+input);
 			String[] in = input.split(" ");
 			boolean isHost = Boolean.parseBoolean(in[0]);
 			int port = Integer.parseInt(in[1]);
 			String host = in[2];
 			connectRight(isHost,port,host);
 			input = from_server.readLine();
-			System.out.println("left "+input);
+//			System.out.println("left "+input);
 			in = input.split(" ");
 			isHost = Boolean.parseBoolean(in[0]);
 			port = Integer.parseInt(in[1]);
 			host = in[2];
 			connectLeft(isHost,port,host);
+			System.out.println("loop done");
 		} 
 		catch(Exception e) {
 			e.printStackTrace();

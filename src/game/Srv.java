@@ -1,4 +1,4 @@
-
+package game;
 import java.io.*;
 import java.net.*;
 
@@ -23,7 +23,7 @@ public class Srv extends Thread{
 			System.exit(1);
 		}
 
-		System.out.println(hostSocket.getInetAddress());
+//		System.out.println(hostSocket.getInetAddress());
 	}
 	
 	public void run() {
@@ -60,11 +60,11 @@ public class Srv extends Thread{
 				String addr = ((InetSocketAddress)sockets[i].getRemoteSocketAddress()).getAddress().toString().replace("/","");
 				if(addr.equals("127.0.0.1")){ //localhost
 					addr = InetAddress.getLocalHost().getHostName();
-					System.out.println("replaced");
+//					System.out.println("replaced");
 				}
 				to_client[(i+1)%Main.numPlayers].println("false " + (port+i+1) +" " +addr);
 				to_client[(i+1)%Main.numPlayers].flush();				
-				System.out.println(addr + (port+i+1));
+//				System.out.println(addr + (port+i+1));
 			}
 		}catch(Exception e) {
 			e.printStackTrace();

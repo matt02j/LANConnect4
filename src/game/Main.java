@@ -1,8 +1,10 @@
-
+package game;
 
 import javafx.scene.paint.Color;
 import java.util.Random;
 import javafx.application.Application;
+import java.util.concurrent.*;
+import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.layout.*;
@@ -63,12 +65,12 @@ public class Main extends Application{
 				cells[i][j].setMinSize(columnWidth, rowHeight);
 				cells[i][j].setOnMouseClicked(e -> {
 					Cell source = ((Cell)e.getSource());
-					if(valid(source)&& turn==me) {
+					if(valid(source.x,source.y)&& turn==me) {
 						source.addCircle();
 						grid[source.x][source.y]=turn;
 						checkWin();
 						turn = (turn+1) %numPlayers;
-						c.sendTurn();
+						c.sendTurn(source.x,source.y);
 					}
 				});
 				
@@ -76,18 +78,40 @@ public class Main extends Application{
 			}
 		}
 		
-		screen.setTitle("Collider-Scope");	
+		screen.setTitle("Conect 4 - Player "+me);	
 		scene = new Scene(board,WIDTH,HEIGHT);
 		
 		screen.setScene(scene);
 		
 		screen.show();
 		//gameloop 
+		AnimationTimer looper = new AnimationTimer() {
+			@Override
+			public void handle(long now) {
+				//loop();
+				try {
+					if(turn != me) {
+						String turnInfo=c.getTurn();
+						if(turnInfo.equals("NA")) {
+							return;
+						}
+						else if(me!= (turn+1)%numPlayers) {
+							c.sendTurn(turnInfo);
+						}
+						
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(44);
+				}
+			}
+		};
+		
+		looper.start();
 
 	}
-	private boolean valid(Object source) {
-		StackPane s = (StackPane)source;
-		return s.getChildren().isEmpty();
+	private boolean valid(int i, int j) {
+		return grid[i][j]==-100;
 		
 	}
 	private void takeTurn() {
@@ -214,8 +238,8 @@ public class Main extends Application{
 	
 
 	public static void main(String[] args) {
-		WIDTH=900;
-		HEIGHT=900; 
+		WIDTH=400;
+		HEIGHT=400; 
 		seed=2;
 		if(args.length < 1) {
 			//error
