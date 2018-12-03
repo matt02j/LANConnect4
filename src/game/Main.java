@@ -3,12 +3,14 @@ package game;
 import javafx.scene.paint.Color;
 import java.util.Random;
 import javafx.application.Application;
-import java.util.concurrent.*;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.scene.layout.*;
 import javafx.scene.shape.*;
+import javafx.stage.Popup;
+import javafx.scene.control.Alert.*;
 
 @SuppressWarnings("restriction")
 public class Main extends Application{
@@ -27,16 +29,19 @@ public class Main extends Application{
 	public static String hostIP;
 	public static int seed;
 	public static int me;
-	
-	
+	public static AnimationTimer looper;
+	public static Stage s;
+	public static Client c;
 	@Override
 	public void start(Stage screen) throws Exception {  //most of this should move to a seperate class
+		s = screen;
+		Srv h;
 		if(isHost) {
-			Srv h = new Srv(12345);
+			h = new Srv(12345);
 			h.start();
 		}
 //		else {
-			Client c = new Client();
+			c = new Client();
 			c.connectToHost(hostIP,12345);
 			c.setBasicInfo();
 			c.setupLoop();
@@ -68,9 +73,13 @@ public class Main extends Application{
 					if(valid(source.x,source.y)&& turn==me) {
 						source.addCircle();
 						grid[source.x][source.y]=turn;
-						checkWin();
 						turn = (turn+1) %numPlayers;
 						c.sendTurn(source.x,source.y);
+						if(checkWin()) {
+							Main.looper.stop();
+							displayWin();
+						}
+						screen.setTitle("Conect 4 - Player "+me+" - Player "+turn+"'s turn");
 					}
 				});
 				
@@ -78,14 +87,14 @@ public class Main extends Application{
 			}
 		}
 		
-		screen.setTitle("Conect 4 - Player "+me);	
+		screen.setTitle("Conect 4 - Player "+me+" - Player "+turn+"'s turn");
 		scene = new Scene(board,WIDTH,HEIGHT);
 		
 		screen.setScene(scene);
 		
 		screen.show();
 		//gameloop 
-		AnimationTimer looper = new AnimationTimer() {
+		looper = new AnimationTimer() {
 			@Override
 			public void handle(long now) {
 				//loop();
@@ -95,10 +104,16 @@ public class Main extends Application{
 						if(turnInfo.equals("NA")) {
 							return;
 						}
-						else if(me!= (turn+1)%numPlayers) {
+						else if(me!= turn) {
 							c.sendTurn(turnInfo);
+							screen.setTitle("Conect 4 - Player "+me+" - Player "+turn+"'s turn");
 						}
-						
+						else if(turn==me) {
+							screen.setTitle("Conect 4 - Player "+me+" - Your turn");
+						}
+						if(checkWin()) {
+							displayWin();
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -110,32 +125,53 @@ public class Main extends Application{
 		looper.start();
 
 	}
+	public void displayWin() {
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("WIN");
+//		alert.setHeaderText("Look, an Error Dialog");
+		alert.setContentText("Player "+Main.turn+" Won");
+		alert.setOnCloseRequest(e->{
+			looper.stop();
+			turn = -1;
+			c.close();
+			s.close();
+		});
+		alert.show();
+	}
 	private boolean valid(int i, int j) {
 		return grid[i][j]==-100;
-		
-	}
-	private void takeTurn() {
-		// TODO Auto-generated method stub
 		
 	}
 	public boolean checkWin() { //maybe distribute this
 		boolean v,h,d,rd;
 		v = checkVertical();
 		h = checkHorizontal();
-//		d = checkDiag();
-//		rd = cheackRevDiag();
-		System.out.println(v || h);
-		return (v|| h );// || d || rd);
+		d = checkDiag();
+		rd = cheackRevDiag();
+		System.out.println(v || h|| d || rd);
+		return (v|| h || d || rd);
 	}
 
-//	private boolean cheackRevDiag() {//paralellize this
-//		// TODO Auto-generated method stub
-//		
-//	}
-//	private boolean checkDiag() {//paralellize this
-//		// TODO Auto-generated method stub
-//		
-//	}
+	private boolean cheackRevDiag() {//paralellize this
+		for(int i=3;i<rows;i++) {
+			for(int j=0;j<columns-3;j++) {
+				if(grid[i][j]==grid[i-1][j+1] && grid[i-1][j+1]==grid[i-2][j+2] && grid[i-2][j+2]==grid[i-3][j+3] && grid[i][j]!=-100) {
+						return true;
+				}
+			}
+		}
+		return false;
+	}
+	private boolean checkDiag() {//paralellize this
+		for(int i=0;i<rows-3;i++) {
+			for(int j=0; j<columns-3;j++) {
+				if(grid[i][j]==grid[i+1][j+1] && grid[i+1][j+1]==grid[i+2][j+2] && grid[i+2][j+2]==grid[i+3][j+3] && grid[i][j]!=-100) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	private boolean checkHorizontal() { //paralellize this
 		//boolean win =false;
 		int[] last3;
